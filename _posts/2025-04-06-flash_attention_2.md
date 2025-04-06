@@ -137,6 +137,7 @@ $$
 \newcommand{\diag}{\text{diag}}
 \newcommand{\quadd}{\quad\quad}
 \newcommand{\quaddd}{\quad\quad\quad}
+\newcommand{\qua}{\hspace{0.66em}}
 
 \begin{flalign*}
 & \text{Require: Matrices } \Q, \K, \V \in \R\sp{N \times d} \text{ in HBM, block sizes } \B_c, \B_r. \\
@@ -155,7 +156,16 @@ $$
 & 8. \quadd \text{ On chip, compute } \S_i\spp{j} = \Q_i\K_j^T \in \R\sp{\B_r \times \B_c }. \\
 & 9. \quadd \text{ On chip, compute } \m_i\spp{j} = \max(\m_i\spp{j-1}, \rowmax(\S_i\spp{j})) \in \R\sp{\B_r}, \\
 & \quaddd \tilde{\P}_i\spp{j} = \exp(\S_i\spp{j}-\m_i\spp{j}) \in \R\sp{\B_r \times \B_c} \\
-& \quaddd \text{(pointwise) } \ell_i\spp{j} = e\sp{\m_i\sp{j-1}-m_i\spp{j}} \ell\spp{j-1} + \rowsum(\tilde{\P}_i\spp{j}) \in \R\sp{\B_r}
+& \quaddd \text{(pointwise) } \ell_i\spp{j} = e\sp{\m_i\sp{j-1}-m_i\spp{j}} \ell\spp{j-1} + \rowsum(\tilde{\P}_i\spp{j}) \in \R\sp{\B_r} \\
+& 10. \quad \qua \text{On chip, compute } \O_i =  \diag(e\sp{\m_i\spp{j-1}-\m_i\spp{j}})\sp{-1}\O_i\spp{j-1}+\tilde{P}_i\spp{j}\V_j \\
+& 11. \quad \qua \text{end for} \\
+& 12. \qua \text{ On chip, compute } \O_i\spp{j} = \diag(\ell_i\spp{T_c})\sp{-1}\O_i\spp{T_c} \\
+& 13. \qua \text{ On chip, compute } L_i = \m_i\spp{T_c} + \log(\ell_i\spp{T_c}) \\
+& 14. \qua \text{ Write } \O_i \text{ to HBM as the } i \text{-th block of } \O \\
+& 15. \qua \text{ Write } L_i \text{ to HBM as the } i \text{-th block of } L \\
+& 16. \text{ end for } \\
+& 17. \text{ Return the Output } \O \text{ and the log-sum-exp } L.
+
 
 \end{flalign*}
 $$

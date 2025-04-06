@@ -76,52 +76,56 @@ def flashatt_kernel(q_ptr, k_ptr, v_ptr, z_ptr, N0, T, B0: tl.constexpr):
 
 **FLASHATTENTION-2** 
 
-FlashAttention-2에서 online softmax는 max, div, exp 연산을 루프 내부에서 최소화하여 속도와 효율을 높였습니다. 
+FlashAttention-2에서는 반복문 중간마다 softmax 정규화를 수행하는 대신, 반복이 끝난 후에 누적된 출력을 최종 분모 $d_N$ (또는 $\ell_i^{(T)}$)로 한 번만 나누는 방식을 채택하였습니다. 
 
-softmax는 다음과 같은 기본 성질이 있습니다. 
+```python
+@triton.jit
+def flashatt2_kernel(q_ptr, k_ptr, v_ptr, z_ptr, N0, T, B0: tl.constexpr):
+    pid = tl.program_id(0)
+    block_indices = pid * B0 + tl.arange(0, B0)
+    block_mask = block_indices < N0
+    q = tl.load(q_ptr + block_indices, mask=block_mask, other=0.0)
 
+    o = tl.zeros((B0,), dtype=tl.float32)
+    m = tl.zeros((B0,), dtype=tl.float32)
+    d = tl.zeros((B0,), dtype=tl.float32)
+
+    for j in range(0, T, B0):
+        tile_indices = j + tl.arange(0, B0)
+        tile_mask = tile_indices < T
+        k = tl.load(k_ptr + tile_indices, mask=tile_mask, other=0.0)
+        v = tl.load(v_ptr + tile_indices, mask=tile_mask, other=0.0)
+
+        x = q[:, None] * k[None, :]
+        tile_m = tl.max(x, axis=1)
+        new_m = tl.maximum(m, tile_m)
+
+        a = tl.exp(x - tile_m[:, None])
+        o = o * tl.exp(m - new_m) + tl.sum(a * v[None, :], axis=1)
+        d = d * tl.exp(m - new_m) + tl.sum(a, axis=1)
+        m = new_m
+
+    out = o / d
+    tl.store(z_ptr + block_indices, out, mask=block_mask)
+```
+
+**unstable softmax**
+
+실험적으로 작성하였습니다.
 $$
-\forall \text{c} \in \mathbb{R}, \quad \frac{e^{x_j}}{\sum_{i=1}^{T}e^{x_i}} = \frac{e^{x_j - c}}{\sum_{i=1}^{T}e^{x_i - c}} 
+\frac{\sum_t e^{m_t - m}\sum_{j\in t}e^{x_j-m_t}v_j}{\sum_t e^{m_t - m}\sum_{j\in t}e^{x_j-m_t}}
+\neq 
+\frac{\sum_{j\in t}e^{x_j-m_t}v_j}{\sum_{j\in t}e^{x_j-m_t}}
 $$
-
-각 타일 $t$의 기준 값 $m_t$ 는 타일 내에서만 동일하고 타일 간에는 다릅니다. 그러므로 $m_t \leq m$ 일때 다음과 같이 나타낼 수 있습니다. 여기서 $e^{m-m_t}$ 는 타일마다 일정한 스케일링 인자 입니다. 
-
-$$
-e^{x_j - m_t} = e^{x_j - m} e^{m - m_t}
-$$
-
-여기서 소프트맥스의 분모와 분자를 다음과 같이 조정할 수 있습니다. 
-
-$$
-n = \sum_t \sum_{j \in t } e^{x_j - m_t} = 
-\sum_t e^{m-m_t}\sum_{j \in t} e^{x_j - m} v_j
-$$
-
-$$
-d = \sum_t \sum_{j \in t } e^{x_j - m_t} = 
-\sum_t e^{m-m_t}\sum_{j \in t} e^{x_j - m}
-$$
-
-여기서 최종 출력은 다음과 같이 나타낼 수 있습니다. 
-
-$$
-O = \frac{n}{d}
-= \frac{\sum_t e^{m-m_t}\sum_{j \in t} e^{x_j - m} v_j}
-{\sum_t e^{m-m_t}\sum_{j \in t} e^{x_j - m}}
-= \frac{\sum_j e^{x_j - m} v_j}
-{\sum_j e^{x_j - m}}
-$$
-
-즉, 타일마다 들어갔던 스케일링 인자가 분모/분자에 공통으로 들어가 약분되어 사라집니다. 이 형태는 softmax-weighted sum 형태가 됩니다. 
-
+어텐션 출력은 다음과 같습니다. 
 $$
 O = \sum_j \text{softmax(x)}_j v_j = \sum_j 
-\frac{e^{x_j}}{\sum_i e^{x_i}} v_j =
-\frac{\sum_j e^{x_j }v_j}{\sum_i e^{x_i}}
+\frac{e^{x_j - m}}{\sum_i e^{x_i -m}} v_j =
+\frac{\sum_j e^{x_j-m}v_j}{\sum_i e^{x_i-m}}
 $$
 
-$\text{for i} \leftarrow 1, \text{N do}$
 
+$\text{for i} \leftarrow 1, \text{N do}$
 $$
 \begin{align*}
 x_i &\leftarrow Q[k,:] K^T[:, i] \\
@@ -139,7 +143,7 @@ $$
 
 ```python
 @triton.jit
-def flashatt2_kernel(q_ptr, k_ptr, v_ptr, z_ptr, N0, T, B0: tl.constexpr):
+def flashatt_kernel(q_ptr, k_ptr, v_ptr, z_ptr, N0, T, B0: tl.constexpr):
     pid = tl.program_id(0)
     block_indices = pid * B0 + tl.arange(0, B0)
     block_mask = block_indices < N0
