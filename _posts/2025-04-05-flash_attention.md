@@ -93,8 +93,8 @@ $$
 | 5: $\text{for } 1 \leq j \leq T_c \text{ do}$ |
 | 6: $\quad$ Load $\mathbf{K}_j, \mathbf{V}_j$ from HBM to on-chip SRAM |
 | 7: $\quad$ $\text{for } 1 \leq i \leq T_r \text{ do}$ |
-| 8: $\quad \ \ \ \quad$ Load $\mathbf{Q}_i, \mathbf{O}_i, \ell_i, m_i$ from HBM to on-chip SRAM |
-| 9: $\quad \ \ \ \quad$ On chip, compute $\mathbf{S}_{ij}$ = $\mathbf{Q_i K_j^T} \in \mathbb{R}^{B_r \times B_c}$ |
+| 8: $\quad \ \ \quad$ Load $\mathbf{Q}_i, \mathbf{O}_i, \ell_i, m_i$ from HBM to on-chip SRAM |
+| 9: $\quad \ \ \quad$ On chip, compute $\mathbf{S}_{ij}$ = $\mathbf{Q_i K_j^T} \in \mathbb{R}^{B_r \times B_c}$ |
 | 10: $\quad \quad$ On chip, compute $\tilde{m}\_{ij} = \text{rowmax}(\mathbf{S}\_{ij}) \in \mathbb{R}^{B_r}$, $\tilde{\mathbf{P}}\_{ij} = e^{\mathbf{S}\_{ij} -\tilde{m}\_{ij}} \in \mathbb{R}^{B_r \times B_c} \text{ (pointwise)}$, $\text{resume}(\tilde{\mathbf{P}}_{ij}) \in \mathbb{R}^{B_r}$. |
 | 11: $\quad \quad$ On chip, compute $m_i^{\text{new}} = \text{max}(m_i, \tilde{m_{ij}}) \in \mathbb{R}^{B_r}, \ell_i^{\text{new}} = e^{m_i - m_i^{\text{new}}}\ell_i + e^{\tilde{m}\_{ij} - m_i^{\text{new}}}\tilde{\ell}_{ij} \in \mathbb{R}^{B_r}$, |
 | 12: $\quad \quad$ Write $\mathbf{O}\_i \leftarrow \text{diag}(\ell_i^{\text{new}})^{-1} (\text{diag}(\ell_i)e^{m_i - m_i^{\text{new}}} \mathbf{O}\_i + e^{e^{\tilde{m}\_{ij}} - m_i^{\text{new}}}\tilde{\mathbf{P}}_{ij}\mathbf{V}_j)$ to HBM |
