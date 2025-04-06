@@ -50,7 +50,7 @@ $$
 
 | (Algorithm 0)  Standard Attention Implementation             |
 | ------------------------------------------------------------ |
-| **Require** : Matrces $Q, K, V \in \mathbb{R}^{N \times d} $ in HBM. |
+| **Require** : Matrces $Q, K, V \in \mathbb{R}\^{N \times d} $ in HBM. |
 | 1: Load $\mathbf{Q, K}$ by blocks from HBM, compute $\mathbf{S = QK^T}$, writh $\mathbf{S}$ to HBM |
 | 2: Read $\mathbf{S}$ from HBM, compute $\mathbf{P} = \text{softmax}(\mathbf{S})$, write $\mathbf{P}$ to HDM |
 | 3: Load $\mathbf{P}$ and $\mathbf{V}$  by blocks from HBM, compute $\mathbf{O = PV}$, writhe $\mathbf{O}$ to HBM |
@@ -88,16 +88,16 @@ $$
 | **Require:**  Matrices $\mathbf{Q, K, V} \in \mathbb{R}^{N \times d}$ in HBM, on-chip SRAM of size M. |
 | 1: Set block sizes $B_c = \lceil \frac{M}{4d} \rceil, B_r = \min(\lceil \frac{M}{4d}, d \rceil )$. |
 | 2: Initialize $\mathbf{O} = (0)_{N \times d} \in \mathbb{R}^{N \times d}, \ell = (0)_N \in \mathbb{R}^N, m = (-\infty)_N \in \mathbb{R}^N$ in HBM. |
-| 3: Divide $\mathbf{Q}$ into $T_r = \lceil \frac{N}{B_r} \rceil$ blocks $\mathbf{Q_1, \dots, Q}_{T_r}$ of size $B_r \times d$  each, and divide $\mathbf{K, V}$ in to $T_c = \lceil \frac{N}{B_c} \rceil $  blocks. |
-| 4: Divide $\mathbf{O}$ into $T_r$ blocks $\mathbf{O}_1$, $\dots,$ $\mathbf{O}_{T_r}$ of size $B_r \times d $ each, devide $\ell$ into $T_r$ blocks $\ell_1, \dots, \ell_{T_r}$ of size $B_r$ each, and devide $m$ into $T_r$ blocks $m_1, \dots, m_{T_r}$ of size $B_r$ each. |
+| 3: Divide $\mathbf{Q}$ into $T_r = \lceil \frac{N}{B_r} \rceil$ blocks $\mathbf{Q_1, \dots, Q}_{T_r}$ of size $B_r \times d$  each, and divide $\mathbf{K, V}$ in to $T_c = \lceil \frac{N}{B_c} \rceil$  blocks. |
+| 4: Divide $\mathbf{O}$ into $T_r$ blocks $\mathbf{O}\_1$, $\dots,$ $\mathbf{O}\_{T_r}$ of size $B_r \times d$ each, devide $\ell$ into $T_r$ blocks $\ell_1, \dots, \ell_{T_r}$ of size $B_r$ each, and devide $m$ into $T_r$ blocks $m_1, \dots, m_{T_r}$ of size $B_r$ each. |
 | 5: $\text{for } 1 \leq j \leq T_c \text{ do}$ |
 | 6:     Load $\mathbf{K}_j, \mathbf{V}_j$ from HBM to on-chip SRAM |
 | 7:     $\text{for } 1 \leq i \leq T_r \text{ do}$ |
 | 8:         Load $\mathbf{Q}_i, \mathbf{O}_i, \ell_i, m_i$ from HBM to on-chip SRAM |
 | 9:         On chip, compute $\mathbf{S}_{ij}$ = $\mathbf{Q_i K_j^T} \in \mathbb{R}^{B_r \times B_c}$ |
-| 10:       On chip, compute $\tilde{m}_{ij} = \text{rowmax}(\mathbf{S}_{ij}) \in \mathbb{R}^{B_r}$, $\tilde{\mathbf{P}}_{ij} = e^{\mathbf{S}_{ij} -\tilde{m}_{ij}} \in \mathbb{R}^{B_r \times B_c} \text{ (pointwise)}$, <br />            $\text{resume}(\tilde{\mathbf{P}}_{ij}) \in \mathbb{R}^{B_r}$. |
-| 11:       On chip, compute $m_i^{\text{new}} = \text{max}(m_i, \tilde{m_{ij}}) \in \mathbb{R}^{B_r}, \ell_i^{\text{new}} = e^{m_i - m_i^{\text{new}}}\ell_i + e^{\tilde{m}_{ij} - m_i^{\text{new}}}\tilde{\ell}_{ij} \in \mathbb{R}^{B_r}$, |
-| 12:       Write $\mathbf{O}_i \leftarrow \text{diag}(\ell_i^{\text{new}})^{-1} (\text{diag}(\ell_i)e^{m_i - m_i^{\text{new}}} \mathbf{O}_i + e^{e^{\tilde{m}_{ij}} - m_i^{\text{new}}}\tilde{\mathbf{P}}_{ij}\mathbf{V}_j)$ to HBM |
+| 10:       On chip, compute $\tilde{m}\_{ij} = \text{rowmax}(\mathbf{S}\_{ij}) \in \mathbb{R}^{B_r}$, $\tilde{\mathbf{P}}\_{ij} = e^{\mathbf{S}\_{ij} -\tilde{m}\_{ij}} \in \mathbb{R}^{B_r \times B_c} \text{ (pointwise)}$, $\text{resume}(\tilde{\mathbf{P}}_{ij}) \in \mathbb{R}^{B_r}$. |
+| 11:       On chip, compute $m_i^{\text{new}} = \text{max}(m_i, \tilde{m_{ij}}) \in \mathbb{R}^{B_r}, \ell_i^{\text{new}} = e^{m_i - m_i^{\text{new}}}\ell_i + e^{\tilde{m}\_{ij} - m_i^{\text{new}}}\tilde{\ell}_{ij} \in \mathbb{R}^{B_r}$, |
+| 12:       Write $\mathbf{O}\_i \leftarrow \text{diag}(\ell_i^{\text{new}})^{-1} (\text{diag}(\ell_i)e^{m_i - m_i^{\text{new}}} \mathbf{O}\_i + e^{e^{\tilde{m}\_{ij}} - m_i^{\text{new}}}\tilde{\mathbf{P}}_{ij}\mathbf{V}_j)$ to HBM |
 | 13:        Write $\ell_i \leftarrow \ell_i^{\text{new}}, m_i \leftarrow m_i^{\text{new}}$  to HBM |
 | 14:        $\text{end for}$ |
 | 15: $\text{end for}$ |
