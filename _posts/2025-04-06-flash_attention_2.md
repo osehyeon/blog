@@ -135,16 +135,27 @@ $$
 \newcommand{\rowmax}{\text{rowmax}} 
 \newcommand{\rowsum}{\text{rowsum}} 
 \newcommand{\diag}{\text{diag}}
+\newcommand{\quadd}{\quad\quad}
+\newcommand{\quaddd}{\quad\quad\quad}
 
 \begin{flalign*}
 & \text{Require: Matrices } \Q, \K, \V \in \R\sp{N \times d} \text{ in HBM, block sizes } \B_c, \B_r. \\
-& 1.\ \text{Divide } \Q \text{ into } T_r = \lceil N / B_r \rceil \text{ blocks } \Q_1, \dots, \Q_T, \text{ each of size } \B_r \times d, \\
+& 1.\text{ Divide } \Q \text{ into } T_r = \lceil N / B_r \rceil \text{ blocks } \Q_1, \dots, \Q_T, \text{ each of size } \B_r \times d, \\
 & \quad \text{and divide } \K, \V \text{ into } T_c = \lceil N / B_c \rceil \text{ blocks } \K_1, \dots, \K_{T_c} \text{ and } \V_1, \dots, \V_{T_c}, \\
 & \quad \text{each of size } \B_c \times d. \\
 
-& 2. \ \text{Divide the output }\O \in \R\sp{N \times d} \text{ into } T_r \text{ blocks } \O_i, \dots, \O_{T_r} \text{ of size } \B_r \times d \text{ each,} \\
-& \quad \text{and divide the log-sum-exp } L \text{ into } T_r \text{ blocks } L_i \dots, L_{T_r} \text{ of size } \B_r \text{ each}.
+& 2. \text{ Divide the output }\O \in \R\sp{N \times d} \text{ into } T_r \text{ blocks } \O_i, \dots, \O_{T_r} \text{ of size } \B_r \times d \text{ each,} \\
+& \quad \text{and divide the log-sum-exp } L \text{ into } T_r \text{ blocks } L_i \dots, L_{T_r} \text{ of size } \B_r \text{ each}. \\
 
+& 3. \text{ for } 1 \leq i \leq T_r \text{ do} \\
+& 4. \quad \text{ Load } \Q_i \text{ from HBM to on-chip SRAM.} \\
+& 5. \quad \text{ On chip, initialize } \O_i\spp{0} = (0)_{\B_r \times d} \in \R\spp{\B_r \times d}, \ell_i\spp{0} = (0)_{\B_r} \in \R\sp{\B_r}, \m_i\spp{0} = (-\infty)_{\B_r} \in \R\sp{\B_r} \\
+& 6. \quad \text{ for } 1 \leq j \leq T_c \text{ do } \\
+& 7. \quadd\text{ Load } \K_j, \V_j \text{ from HBM to on-chip SRAM } \\
+& 8. \quadd \text{ On chip, compute } \S_i\spp{j} = \Q_i\K_j^T \in \R\sp{\B_r \times \B_c }. \\
+& 9. \quadd \text{ On chip, compute } \m_i\spp{j} = \max(\m_i\spp{j-1}, \rowmax(\S_i\spp{j})) \in \R\sp{\B_r}, \\
+& \quaddd \tilde{\P}_i\spp{j} = \exp(\S_i\spp{j}-\m_i\spp{j}) \in \R\sp{\B_r \times \B_c} \\
+& \quaddd \text{(pointwise) } \ell_i\spp{j} = e\sp{\m_i\sp{j-1}-m_i\spp{j}} \ell\spp{j-1} + \rowsum(\tilde{\P}_i\spp{j}) \in \R\sp{\B_r}
 
 \end{flalign*}
 $$
