@@ -138,7 +138,14 @@ $$
 
 \begin{flalign*}
 & \text{Require: Matrices } \Q, \K, \V \in \R\sp{N \times d} \text{ in HBM, block sizes } \B_c, \B_r. \\
-& 1. \text{ Divide } \Q \text{ into } T_r = \lceil \frac{N}{B_r} \rceil \text{ blocks } \Q_1, \dots, \Q_T, \text{ of size } \B_r \times d \text{ each, and divide } \K, \V \text{ in to } T_c = \lceil \frac{N}{B_c} \rceil \text{ blocks } \K_1, \dots, \K_{T_c} \text{ and } \V_1, \dots, \V_{T_c}, \text{ of size } \B_c \times d \text{ each }
+& 1.\ \text{Divide } \Q \text{ into } T_r = \lceil N / B_r \rceil \text{ blocks } \Q_1, \dots, \Q_T, \text{ each of size } \B_r \times d, \\
+& \quad \text{and divide } \K, \V \text{ into } T_c = \lceil N / B_c \rceil \text{ blocks } \K_1, \dots, \K_{T_c} \text{ and } \V_1, \dots, \V_{T_c}, \\
+& \quad \text{each of size } \B_c \times d. \\
+
+& 2. \ \text{Divide the output }\O \in \R\sp{N \times d} \text{ into } T_r \text{ blocks } \O_i, \dots, \O_{T_r} \text{ of size } \B_r \times d \text{ each,} \\
+& \quad \text{and divide the log-sum-exp } L \text{ into } T_r \text{ blocks } L_i \dots, L_{T_r} \text{ of size } \B_r \text{ each}.
+
+
 \end{flalign*}
 $$
 
