@@ -49,15 +49,96 @@ $$
 
 \begin{align*}
 m^{(1)} &= \text{rowmax}(\S^{(1)}) \in \R^{\B_r} \\
-\ell^{(1)} &= \text{rowsum}(e^{\s\sn{1}-\m\sn{1}}) \in \R^{\B_r} \\
+\ell^{(1)} &= \text{rowsum}(e^{\S\sn{1}-\m\sn{1}}) \in \R^{\B_r} \\
 \tilde{\P}\sn{1} &= \text{diag}(\ell\sn{1})^{-1}e^{\S\sn{1}-\m\sn{1}} \in \R^{\B_r \times \B_c} \\\
 \O\sn{1} &= \tilde{\P}\sn{1}\V\sn{1} = \text{diag}(\ell\sn{1})^{-1} e^{\S\sn{1} - \m\sn{1}}\V\sn{1} \in \R^{\B_r \times d} \\
 \m\sn{2} &= \max(\m\sn{1}, \text{rowmax}(\S\sn{2})) = \m \\
 \ell\sn{2} &= e^{\m\sn{1} - \m\sn{2}} \ell\sn{1} + \text{rowsum}(e^{\S\sn{2}-\m\sn{2}}) = \text{rowsum}(e^{\S\sn{1}-\m}) + \text{rowsum}(e^{\S\sn{2}-\m})=\ell \\
-\tilde{\P\sn{2}} &= \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{2}-\m\sn{2}} \\ 
-\O\sn{2} &= \text{diag}(\ell\sn{1} / \ell\sn{2})^{-1} \O\sn{1} + \tilde{\P\sn{2}}\V\sn{2} = \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{1}-\m}\V\sn{1} + \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{2}-\m}\V\sn{2} = \O
+\tilde{\P}\sn{2} &= \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{2}-\m\sn{2}} \\ 
+\O\sn{2} &= \text{diag}(\ell\sn{1} / \ell\sn{2})^{-1} \O\sn{1} + \tilde{\P}\sn{2}\V\sn{2} = \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{1}-\m}\V\sn{1} + \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{2}-\m}\V\sn{2} = \O
 \end{align*}
 $$
 
 ## FlashAttention-2
+
+A100 GPU에서 FP16 연산 시 Tensor Core는 최대 312 TFLOPs/s의 연산 성능을 제공하는 반면, FP32 연산을 수행하는 CUDA Core는 최대 19.5 TFLOPs/s에 그칩니다.
+
+ 따라서, 행렬곱 연산은 가능한 한 Tensor Core에서 수행하도록 하고, softmax와 같은 CUDA Core 기반 연산은 계산량을 최소화하는 것이 바람직합니다. 이러한 원칙에 따라, FlashAttention-1의 온라인 softmax 알고리즘은 이러한 측면에서 개선되었습니다.
+
+출력을 업데이트 할때 두 항을 $\text{diag}(\ell^{(2)})^{-1}$로 조정할 필요가 없습니다. 
+
+$$
+\newcommand{\sn}[1]{^{(#1)}}
+\newcommand{\m}{\boldsymbol{m}} 
+\newcommand{\S}{\mathbf{S}} 
+\newcommand{\V}{\mathbf{V}} 
+\newcommand{\O}{\mathbf{O}} 
+
+\O\sn{2} = \text{diag}(\ell\sn{1} / \ell\sn{2})^{-1}\O\sn{1} + \text{diag}(\ell\sn{2})^{-1}e^{\S\sn{2}-\m\sn{2}}\V\sn{2}
+$$
+
+그 대신 $\mathbf{O}^{(1)}$ 의 "un-scaled" 버전을 유지하고 $\ell^{(2)}$와 같은 통계 정보를 보관할 수 있습니다. 
+
+$$
+\newcommand{\sn}[1]{^{(#1)}}
+\newcommand{\m}{\boldsymbol{m}} 
+\newcommand{\S}{\mathbf{S}} 
+\newcommand{\V}{\mathbf{V}} 
+\newcommand{\O}{\mathbf{O}} 
+\tilde{\O}\sn{2} = \text{diag}(\ell\sn{1})^{-1}\O\sn{1} + e^{\S\sn{2} - \m\sn{2}}\V\sn{2}.
+$$
+
+이는 스케일링 된 출력 값을 직접 저장하지 않고, 루프의 마지막에서 $\tilde{\mathbf{O}}^{(\text{last})}$ 를 $\text{diag}(\ell^{(\text{last})})^{-1}$로 스케일링하여 올바른 출력을 얻습니다. 
+
+$$
+\newcommand{\sn}[1]{^{#1}}
+\newcommand{\m}{\boldsymbol{m}} 
+\newcommand{\B}{\boldsymbol{B}} 
+\newcommand{\P}{\mathbf{P}} 
+\newcommand{\S}{\mathbf{S}} 
+\newcommand{\Q}{\mathbf{Q}} 
+\newcommand{\K}{\mathbf{K}} 
+\newcommand{\V}{\mathbf{V}} 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\O}{\mathbf{O}} 
+\newcommand{\rowmax}{\text{rowmax}} 
+\newcommand{\rowsum}{\text{rowsum}} 
+\newcommand{\diag}{\text{diag}} 
+
+\begin{align*}
+\m\sn{(1)} &= \rowmax(\S\sn{(1)}) \in \R\sn{\B_r} \\
+\ell\sn{(1)} &= \rowsum(e^{\s\sn{(1)}-\m\sn{(1)}}) \in \R\sn{\B_r} \\
+\tilde{\O}\sn{(1)} &= e\sn{\S\sn{(1)}-\m\sn{(1)}}\V\sn{(1)} \in \R\sn{\B_r \times d} \\
+\m\sn{(2)} &= \max(\m\sn{(1)}, \rowmax{\S\sn{(2)}}) =\m \\
+\ell\sn{(2)} &= e\sn{\m\sn{(1)}-\m\sn{(2)}}\ell\sn{(1)} + \rowsum(e\sn{\S\sn{(2)}-\m\sn{(2)}}) = \rowsum(e\sn{\S\sn{(1)}-\m}) + \rowsum(e\sn{\S\sn{2}-m}) = \ell\\
+\tilde{\P}\sn{(2)} &= \diag(\ell\sn{(2)})\sn{-1}e\sn{\S\sn{(2)}-\m\sn{(2)}} \\
+\tilde{\O}\sn{(2)} &= \diag(e\sn{\m\sn{(1)}-\m\sn{(2)}})\sn{-1}\tilde{\O}\sn{(1)} + e\sn{\S\sn{(2)}-\m\sn{(2)}}\V\sn{(2)} = e\sn{\S\sn{(1)}-\m}\V\sn{(1)} + e\sn{\S\sn{(2)}-\m}\V\sn{(2)} \\
+\O\sn{(2)} &= \diag(\ell\sn{(2)})\sn{-1}\tilde{\O}\sn{(2)} = \O.
+
+\end{align*}
+$$
+
+### Algorithm 1 FlashAttention-2 forward pass 
+
+$$
+\newcommand{\sp}[1]{^{#1}}
+\newcommand{\spp}[1]{^{(#1)}}
+\newcommand{\m}{\boldsymbol{m}} 
+\newcommand{\B}{\boldsymbol{B}} 
+\newcommand{\P}{\mathbf{P}} 
+\newcommand{\S}{\mathbf{S}} 
+\newcommand{\Q}{\mathbf{Q}} 
+\newcommand{\K}{\mathbf{K}} 
+\newcommand{\V}{\mathbf{V}} 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\O}{\mathbf{O}} 
+\newcommand{\rowmax}{\text{rowmax}} 
+\newcommand{\rowsum}{\text{rowsum}} 
+\newcommand{\diag}{\text{diag}}
+
+\begin{flalign*}
+& \text{Require: Matrices } \Q, \K, \V \in \R\sp{N \times d} \text{ in HBM, block sizes } \B_c, \B_r. \\
+& 1. \text{ Divide } \Q \text{ into } T_r = \lceil \frac{N}{B_r} \rceil \text{ blocks } \Q_1, \dots, \Q_T, \text{ of size } \B_r \times d \text{ each, and divide } \K, \V \text{ in to } T_c = \lceil \frac{N}{B_c} \rceil \text{ blocks } \K_1, \dots, \K_{T_c} \text{ and } \V_1, \dots, \V_{T_c}, \text{ of size } \B_c \times d \text{ each }
+\end{flalign*}
+$$
 
