@@ -107,7 +107,7 @@ $$
 
 \begin{align*}
 \m\sn{(1)} &= \rowmax(\S\sn{(1)}) \in \R\sn{\B_r} \\
-\ell\sn{(1)} &= \rowsum(e^{\s\sn{(1)}-\m\sn{(1)}}) \in \R\sn{\B_r} \\
+\ell\sn{(1)} &= \rowsum(e^{\sn{(1)}-\m\sn{(1)}}) \in \R\sn{\B_r} \\
 \tilde{\O}\sn{(1)} &= e\sn{\S\sn{(1)}-\m\sn{(1)}}\V\sn{(1)} \in \R\sn{\B_r \times d} \\
 \m\sn{(2)} &= \max(\m\sn{(1)}, \rowmax{\S\sn{(2)}}) =\m \\
 \ell\sn{(2)} &= e\sn{\m\sn{(1)}-\m\sn{(2)}}\ell\sn{(1)} + \rowsum(e\sn{\S\sn{(2)}-\m\sn{(2)}}) = \rowsum(e\sn{\S\sn{(1)}-\m}) + \rowsum(e\sn{\S\sn{2}-m}) = \ell\\
