@@ -89,7 +89,7 @@ $$
 | 1: Set block sizes $B_c = \lceil \frac{M}{4d} \rceil, B_r = \min(\lceil \frac{M}{4d}, d \rceil )$. |
 | 2: Initialize $\mathbf{O} = (0)_{N \times d} \in \mathbb{R}^{N \times d}, \ell = (0)_N \in \mathbb{R}^N, m = (-\infty)_N \in \mathbb{R}^N$ in HBM. |
 | 3: Divide $\mathbf{Q}$ into $T_r = \lceil \frac{N}{B_r} \rceil$ blocks $\mathbf{Q_1, \dots, Q}_{T_r}$ of size $B_r \times d$  each, and divide $\mathbf{K, V}$ in to $T_c = \lceil \frac{N}{B_c} \rceil $  blocks. |
-| 4: Divide $\mathbf{O}$ into $T_r$ blocks $\mathbf{O}_1, \dots, \mathbf{O} _{T_r}$ of size $B_r \times d $ each, devide $\ell$ into $T_r$ blocks $\ell_1, \dots, \ell_{T_r}$ of size $B_r$ each, and devide $m$ into $T_r$ blocks $m_1, \dots, m_{T_r}$ of size $B_r$ each. |
+| 4: Divide $\mathbf{O}$ into $T_r$ blocks $\mathbf{O}_1$, $\dots,$ $\mathbf{O}_{T_r}$ of size $B_r \times d $ each, devide $\ell$ into $T_r$ blocks $\ell_1, \dots, \ell_{T_r}$ of size $B_r$ each, and devide $m$ into $T_r$ blocks $m_1, \dots, m_{T_r}$ of size $B_r$ each. |
 | 5: $\text{for } 1 \leq j \leq T_c \text{ do}$ |
 | 6:     Load $\mathbf{K}_j, \mathbf{V}_j$ from HBM to on-chip SRAM |
 | 7:     $\text{for } 1 \leq i \leq T_r \text{ do}$ |
