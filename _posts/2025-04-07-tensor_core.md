@@ -27,6 +27,80 @@ Tensor Core는 NVIDIA GPU의 SM(Streaming Multiprocessor) 내부에 통합된 �
 5. Blackwell
    - Micro‑tensor scaled FP4, FP6, FP8 신규 부동소수점 포맷
 
+### gemm_fp16
+
+```c++
+#include <mma.h>
+#include <cuda_fp16.h>
+using namespace nvcuda;
+
+#define WMMA_M 16
+#define WMMA_N 16
+#define WMMA_K 16
+
+extern "C"
+__global__ void wmma_gemm_fp16(const half *A, const half *B, float *C, int K, int N) {
+    int tileRow = blockIdx.y;
+    int tileCol = blockIdx.x; 
+
+    wmma::fragment<wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half, wmma::row_major> aFrag;
+    wmma::fragment<wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half, wmma::row_major> bFrag;
+    wmma::fragment<wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> cFrag;
+
+    wmma::fill_fragment(cFrag, 0.0f);
+
+    for (int k0 = 0; k0 < K; k0 += WMMA_K) {
+        const half* tileA = A + tileRow * WMMA_M * K + k0; 
+        const half* tileB = B + k0 * N + tileCol * WMMA_N;
+
+        wmma::load_matrix_sync(aFrag, tileA, K);
+        wmma::load_matrix_sync(bFrag, tileB, N);
+        wmma::mma_sync(cFrag, aFrag, bFrag, cFrag);
+    }
+
+    float *tileC = C + tileRow * WMMA_M * N + tileCol * WMMA_N;
+    wmma::store_matrix_sync(tileC, cFrag, N, wmma::mem_row_major);
+}
+```
+
+### gemm_bf16
+
+```c++
+#include <mma.h>
+#include <cuda_bf16.h>
+using namespace nvcuda;
+
+#define WMMA_M 16
+#define WMMA_N 16
+#define WMMA_K 16
+
+extern "C"
+__global__ void wmma_gemm_bf16(const nv_bfloat16 *A, const nv_bfloat16 *B, float *C, int K, int N) {
+    int tileRow = blockIdx.y;
+    int tileCol = blockIdx.x;
+
+    wmma::fragment<wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, nv_bfloat16, wmma::row_major> aFrag;
+    wmma::fragment<wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, nv_bfloat16, wmma::row_major> bFrag;
+    wmma::fragment<wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> cFrag;
+
+    wmma::fill_fragment(cFrag, 0.0f);
+
+    for (int k0 = 0; k0 < K; k0 += WMMA_K) {
+        const nv_bfloat16* tileA = A + tileRow * WMMA_M * K + k0;
+        const nv_bfloat16* tileB = B + k0 * N + tileCol * WMMA_N;
+
+        wmma::load_matrix_sync(aFrag, tileA, K);
+        wmma::load_matrix_sync(bFrag, tileB, N);
+        wmma::mma_sync(cFrag, aFrag, bFrag, cFrag);  // Supported on sm_80+
+    }
+
+    float *tileC = C + tileRow * WMMA_M * N + tileCol * WMMA_N;
+    wmma::store_matrix_sync(tileC, cFrag, N, wmma::mem_row_major);
+}
+```
+
+
+
 ## CUDA Core 
 
 NVIDIA GPU의 가장 기본적인 연산 유닛입니다.
@@ -36,14 +110,26 @@ NVIDIA GPU의 가장 기본적인 연산 유닛입니다.
 네 개의 곱셈 + 합산을 하나의 명령어로 , 한 사이클에 실행 가능합니다. 
 
 ```C++
-acc = dp4a(int8x4_a, int8x4_b, acc);  // int8×4 → int32
-```
+extern "C" __global__
+void dp4a_kernel(const int* a, const int* b, int* out, int N) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-```C+++
-acc += (int32_t)a[0] * (int32_t)b[0]
-     + (int32_t)a[1] * (int32_t)b[1]
-     + (int32_t)a[2] * (int32_t)b[2]
-     + (int32_t)a[3] * (int32_t)b[3];
+    int acc = 0;
+    int a_val = 0, b_val = 0;
+
+    if (idx < N) {
+        a_val = a[idx];
+        b_val = b[idx];
+    }
+
+    asm volatile(
+        "dp4a.s32.s32 %0, %1, %2, %3;" :
+        "=r"(acc) : "r"(a_val), "r"(b_val), "r"(acc)
+    );
+
+    if (idx < N)
+        out[idx] = acc;
+}
 ```
 
 **INT32 곱셈기 모델**
