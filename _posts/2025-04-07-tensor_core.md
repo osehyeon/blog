@@ -23,9 +23,11 @@ Tensor Core는 NVIDIA GPU의 SM(Streaming Multiprocessor) 내부에 통합된 �
    - 희소성(sparsity) 가속 지원 
 4. Hopper (sm_90, H100)
    - FP8 (E4M3, E5M2) 입력 형식 네이티브 지원
+     - E4M3: 최대 값: $448$, 최소값: $0.015625$
+     - E5M2: 최대 값: $57344$, 최소 값: $6.1035 \times 10^{-5}$
    - 비동기(`mma_async`) 연산, 공유 메모리에서 연산 유닛이 직접 데이터 참조 가능  
 5. Blackwell
-   - Micro‑tensor scaled FP4, FP6, FP8 신규 부동소수점 포맷
+   - Micro‑tensor scaled FP4, FP6, FP8 신규 부동소수점 포맷 $\rightarrow$ 양자화의 float 버전(`fp32_val = fpX_val x scale`)
 
 ### gemm_fp16
 
