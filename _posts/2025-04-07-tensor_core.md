@@ -13,19 +13,19 @@ Tensor Core는 NVIDIA GPU의 SM(Streaming Multiprocessor) 내부에 통합된 �
 ### 세대별 지원
 
 1. Volta (sm_70, Tesla V100)
-   - 첫 도입(2017년): FP16 입력 $\rightarrow$ FP32 누산(Accumulate) MMA 연산 지원 
+   - 첫 도입(2017년): FP16 입력 $\rightarrow$ FP32 누산(Accumulate) MMA 연산을 지원합니다. 
 2. Tuning (sm_75, GeForce RTX 20 시리즈)
-   - FP16 이외에 INT8, INT4 정수 연산 모드 추가 
+   - FP16 이외에 INT8, INT4 정수 연산 모드가 추가되었습니다. 
 3. Ampere (sm_80, A100)
-   - BFloat16(BF16) 및 TensorFloat-32(TF32) 지원 
+   - BFloat16(BF16) 및 TensorFloat-32(TF32) 지원합니다.
    - FP64 IEEE-compliant MMA 지원 (FP64 입력 $\rightarrow$ FP64 누산)
-   - INT8, INT4 희소 연산 지원 
-   - 희소성(sparsity) 가속 지원 
+   - INT8, INT4 희소 연산 지원합니다.
+   - 희소성(sparsity) 가속 지원합니다. 
 4. Hopper (sm_90, H100)
-   - FP8 (E4M3, E5M2) 입력 형식 네이티브 지원
+   - FP8 (E4M3, E5M2) 입력 형식 네이티브 지원합니다. 
      - E4M3: 최대 값: $448$, 최소값: $0.015625$
      - E5M2: 최대 값: $57344$, 최소 값: $6.1035 \times 10^{-5}$
-   - 비동기(`mma_async`) 연산, 공유 메모리에서 연산 유닛이 직접 데이터 참조 가능  
+   - 비동기(`mma_async`) 연산, 공유 메모리에서 연산 유닛이 직접 데이터 참조 가능합니다. 
 5. Blackwell
    - Micro‑tensor scaled FP4, FP6, FP8 신규 부동소수점 포맷 $\rightarrow$ 양자화의 float 버전(`fp32_val = fpX_val x scale`)
 
@@ -157,7 +157,7 @@ int mul_bitwise_int32(int32_t A, int32_t B) {
 $$
 \begin{align*}
 5  \times 3&= 15\\
-&= 0\text{b}0101 + 0\text{b}0101 \ll 1 = 0\text{b}1111
+0\text{b}0101 + 0\text{b}0101 \ll 1 &= 0\text{b}1111
 \end{align*}
 $$
 
