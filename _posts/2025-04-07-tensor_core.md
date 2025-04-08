@@ -101,6 +101,42 @@ __global__ void wmma_gemm_bf16(const nv_bfloat16 *A, const nv_bfloat16 *B, float
 }
 ```
 
+### gemm_int8
+
+```c++
+#include <mma.h>
+#include <cuda.h>
+using namespace nvcuda;
+
+#define MMA_M 16
+#define MMA_N 16
+#define MMA_K 16
+
+extern "C"
+__global__ void mma_gemm_int8(const int8_t *A, const int8_t *B, int32_t *C, int K, int N) {
+    int tileRow = blockIdx.y;
+    int tileCol = blockIdx.x;
+
+    wmma::fragment<wmma::matrix_a, MMA_M, MMA_N, MMA_K, int8_t, wmma::row_major> aFrag;
+    wmma::fragment<wmma::matrix_b, MMA_M, MMA_N, MMA_K, int8_t, wmma::row_major> bFrag;
+    wmma::fragment<wmma::accumulator, MMA_M, MMA_N, MMA_K, int32_t> cFrag;
+
+    wmma::fill_fragment(cFrag, 0);
+
+    for (int k0 = 0; k0 < K; k0 += MMA_K) {
+        const int8_t* tileA = A + tileRow * MMA_M * K + k0;
+        const int8_t* tileB = B + k0 * N + tileCol * MMA_N;
+
+        wmma::load_matrix_sync(aFrag, tileA, K);
+        wmma::load_matrix_sync(bFrag, tileB, N);
+        wmma::mma_sync(cFrag, aFrag, bFrag, cFrag);
+    }
+
+    int32_t *tileC = C + tileRow * MMA_M * N + tileCol * MMA_N;
+    wmma::store_matrix_sync(tileC, cFrag, N, wmma::mem_row_major);
+}
+```
+
 
 
 ## CUDA Core 
