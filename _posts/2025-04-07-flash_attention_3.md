@@ -26,7 +26,7 @@ typora-root-url: .
 
 ![image-20250407124735334](../../images/2025-04-07-flash_attention_3/image-20250407124735334.png)
 
-![image-20250407120359589](./../images/2025-04-07-flash_attention_3/image-20250407120359589.png)
+![image-20250407120359589](../../images/2025-04-07-flash_attention_3/image-20250407120359589.png)
 
 2. **Thread hierarchy**
    - Thread (스레드)
@@ -48,10 +48,6 @@ typora-root-url: .
    - Grid (그리드)
      - 커널 실행 시 한 번에 런치되는 모든 CTA(스레드블록)의 집합.
      - 셀프 어텐션에서는 Batch $\times$ Head $\times$ Row 블록 수 만큼 CTA를 띄우고, 배치 행렬 곱에서는  Batch $\times$ M $\times$ N 블록 수 만큼 CTA를 띄운다. 
-
 3. **Ascynchrony and warp-specialization**
    - 데이터 이동(global $\rightarrow$ shared 복사)와 게산(Tensor Core 행렬곱)을 서로 완전히 겹쳐서(overlap) 실행할 수 있습니다. 
    - 한 CTA 내의 워프 그룹(warp‑group) 단위로, 일부 워프 그룹을 Producer 워프(오직 TMA로 데이터 로드/저장만 수행)로, 나머지 워프 그룹을 Consumer 워프(오직 WGMMA로 행렬곱만 수행)로 분할(specialize)하면 메모리 대기 시간과 계산 대기 시간을 서로 숨길 수 있습니다.
-
-4. **Low-precision number formats**
-   - 
