@@ -33,7 +33,7 @@ $$
 `Logsumexp`는 다음과 같은 형태의 수학 함수를 가르킨다.
 
 $$
-\text{logsumexp}(x_1, x_2, \dots, x_n) \coloneqq \log \left (\sum_{j=1}^n \exp(x_j) \right )
+\text{logsumexp}(x_1, x_2, \dots, x_n) := \log \left (\sum_{j=1}^n \exp(x_j) \right )
 $$
 
 위와 같은 형태는 $x$ 값의 크기에 따라 **overflow** 및 **underflow** 문제가 발생한다. 수치를 **안정화**하기 위해 재정렬이 필요하다. 
