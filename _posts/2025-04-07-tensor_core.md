@@ -146,7 +146,7 @@ NVIDIA GPU의 가장 기본적인 연산 유닛입니다.
 
 네 개의 곱셈 + 합산을 하나의 명령어로 , 한 사이클에 실행 가능합니다. 
 
-```C++
+```c++
 extern "C" __global__
 void dp4a_kernel(const int* a, const int* b, int* out, int N) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -168,6 +168,8 @@ void dp4a_kernel(const int* a, const int* b, int* out, int N) {
         out[idx] = acc;
 }
 ```
+
+
 
 **INT32 곱셈기 모델**
 
@@ -198,6 +200,7 @@ $$
 $$
 
 
+
 **INT8 곱셈기 모델**
 
 ```c++
@@ -218,9 +221,11 @@ int32_t mul_bitwise_int8(int8_t a, int8_t b) {
 }
 ```
 
+
+
 **dp4a 모델** 
 
-```C++
+```c++
 int32_t mulacc_dp4a(const int8_t a[4], const int8_t b[4], int32_t acc) {
 
 		int32_t sum = 0;
