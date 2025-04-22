@@ -138,7 +138,6 @@ __global__ void mma_gemm_int8(const int8_t *A, const int8_t *B, int32_t *C, int 
 ```
 
 
-
 ## CUDA Core 
 
 NVIDIA GPU의 가장 기본적인 연산 유닛입니다.
@@ -190,6 +189,7 @@ int mul_bitwise_int32(int32_t A, int32_t B) {
 ```
 
 **INT32 곱셈 예시**
+
 $$
 \begin{align*}
 5  \times 3&= 15\\
@@ -232,12 +232,3 @@ int32_t mulacc_dp4a(const int8_t a[4], const int8_t b[4], int32_t acc) {
     return acc + sum;
 }
 ```
-
-
-
-
-
-
-
-
-
