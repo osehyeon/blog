@@ -31,7 +31,6 @@ p_i = \text{softmax}(x_i) = \frac{\exp(x_i)}{\sum_{j=1}^n \exp(x_j)} = \frac{\ex
 $$
 
 `Logsumexp`는 다음과 같은 형태의 수학 함수를 가르킨다.
-
 $$
 \text{logsumexp}(x_1, x_2, \dots, x_n) := \log \left (\sum_{j=1}^n \exp(x_j) \right )
 $$
@@ -53,8 +52,10 @@ $$
 softmax는 `logsumexp`로 표현할 수 있다. 
 
 $$
-p_i = \frac{\exp(x_i)}{Z} = \exp(x_i - \log Z)$\ \log Z = \text{logsumexp}(x_1, x_2, \dots, x_n)$  임으로 최종적으로 다음과 같이 정의된다.
+p_i = \frac{\exp(x_i)}{Z} = \exp(x_i - \log Z)
 $$
+
+$ \log Z = \text{logsumexp}(x_1, x_2, \dots, x_n)$  임으로 최종적으로 다음과 같이 정의된다.
 
 $$
 p_i = \exp(x_i - \text{logsumexp}(x_1, x_2, \dots, x_n))
