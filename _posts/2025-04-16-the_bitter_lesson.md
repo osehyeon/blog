@@ -6,7 +6,7 @@ toc: true
 typora-root-url: .
 ---
 
-Rich Sutton의 「The Bitter Lesson」 에 대해 다루고 있다. 
+Rich Sutton의 「The Bitter Lesson」 에 대해 다루고 있습니다.
 
 ## The Bitter Lesson 
 
