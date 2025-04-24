@@ -112,12 +112,15 @@ def flashatt2_kernel(q_ptr, k_ptr, v_ptr, z_ptr, N0, T, B0: tl.constexpr):
 **unstable softmax**
 
 실험적으로 작성하였습니다.
+
 $$
 \frac{\sum_t e^{m_t - m}\sum_{j\in t}e^{x_j-m_t}v_j}{\sum_t e^{m_t - m}\sum_{j\in t}e^{x_j-m_t}}
 \neq 
 \frac{\sum_{j\in t}e^{x_j-m_t}v_j}{\sum_{j\in t}e^{x_j-m_t}}
 $$
+
 어텐션 출력은 다음과 같습니다. 
+
 $$
 O = \sum_j \text{softmax(x)}_j v_j = \sum_j 
 \frac{e^{x_j - m}}{\sum_i e^{x_i -m}} v_j =
@@ -126,6 +129,7 @@ $$
 
 
 $\text{for i} \leftarrow 1, \text{N do}$
+
 $$
 \begin{align*}
 x_i &\leftarrow Q[k,:] K^T[:, i] \\
