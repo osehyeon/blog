@@ -3,7 +3,7 @@ layout: single
 title:  "The Bitter Lesson"
 categories: "일상"
 toc: true
-typora-root-url: .
+typora-root-url: ./typora-root-url
 ---
 
 Rich Sutton의 「The Bitter Lesson」 에 대해 다루고 있습니다.

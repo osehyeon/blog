@@ -3,7 +3,7 @@ layout: single
 title:  "텐서 코어와 쿠다 코어"
 categories: "코딩"
 toc: true
-typora-root-url: .
+typora-root-url: ./typora-root-url
 ---
 
 CUDA Core는 NVIDIA GPU의 가장 기본적인 연산 유닛입니다. Tensor Core 는 매트릭스 연산에 특화된 고속 연산 유닛입니다. 이번 포스팅은 쿠다 코어와 텐서 코어에 대해 다룹니다. 

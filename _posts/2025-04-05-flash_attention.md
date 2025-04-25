@@ -3,12 +3,15 @@ layout: single
 title:  "[논문 리뷰] FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness"
 categories: "논문"
 toc: true
-typora-root-url: .
+typora-root-url: ./typora-root-url
 ---
 
 "FlashAttention" 논문은 스탠포드 대학교 박사 과정 학생인 Tri Dao가 Transformer 모델에서 긴 시퀀스를 처리할 때 self-attention 메커니즘이 메모리와 계산 효율성 면에서 비효율적인 문제를 해결하고자 제안되었습니다. 해당 연구는 2022년 5월에 arXiv에 처음 공개되었으며, 이후 NeurIPS 2022(Advances in Neural Information Processing Systems)에서 포스터 발표 형식으로 소개되었습니다.
 
-![image-20250405182831999](../../images/2025-04-05-int_flashatttention/image-20250405182831999.png)
+<p aling="center">
+<img src="../../images/2025-04-05-int_flashatttention/image-20250405182831999.png", style="width: 80%;">
+</p>
+
 
 해당 이미지는 FlashAttention의 핵심 아이디어를 설명합니다.
 
@@ -32,7 +35,9 @@ Pytorch는 Matmul, Mask, Softmax, Dropout 등의 연산을 순차적으로 수�
 
 FlashAttention은 이러한 연산들을 Fused Kernel로 통합하여 처리합니다.
 
-![Flash Attention](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/tgi/flash-attn.png)
+<p align="center">
+  <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/tgi/flash-attn.png" style="width:90%;">
+</p>
 
 ## Standard Attention Implementation
 

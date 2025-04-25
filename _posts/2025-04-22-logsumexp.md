@@ -3,7 +3,7 @@ layout: single
 title:  "FlashAttenion의 Logsumexp 분석"
 categories: "코딩"
 toc: true
-typora-root-url: .
+typora-root-url: ./typora-root-url
 ---
 
 [Triton Tutorials](https://triton-lang.org/main/getting-started/tutorials/index.html)의 [Fused Attention](https://triton-lang.org/main/getting-started/tutorials/06-fused-attention.html#sphx-glr-getting-started-tutorials-06-fused-attention-py) 예제의 `_attn_fwd` 를 확인할 경우 다음과 같은 코드를 확인할 수 있습니다.

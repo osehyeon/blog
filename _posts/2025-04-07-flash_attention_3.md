@@ -3,7 +3,7 @@ layout: single
 title:  "[논문 리뷰] FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision"
 categories: "논문"
 toc: true
-typora-root-url: .
+typora-root-url: ./typora-root-url
 ---
 
 “FlashAttention-3” 논문은 Jay Shah, Ganesh Bikshandi, Ying Zhang, Vijay Thakkar, Pradeep Ramani, 그리고 Tri Dao 등이 공동으로 제안한 연구로, 트랜스포머 모델에서 긴 시퀀스를 처리할 때 어텐션 메커니즘의 메모리 및 연산 효율성을 극대화하고자 개발되었습니다. 이 논문은 2024년 7월 arXiv에 처음 공개되었으며, 이후 NeurIPS 2024 메인 컨퍼런스 트랙에 정식 채택되어 발표되었습니다.
@@ -20,34 +20,44 @@ typora-root-url: .
 
 ## GPU 하드웨어 특성
 
-1. **Memory hierarchy**
+### 아키텍처 
 
-![image-20250407124612181](../../images/2025-04-07-flash_attention_3/image-20250407124612181.png)
+<p align="center">
+  <img src="../../images/2025-04-07-flash_attention_3/image-20250407124612181.png" style="width:95%;">
+</p>
 
-![image-20250407124735334](../../images/2025-04-07-flash_attention_3/image-20250407124735334.png)
+### SM 내부 모습 
 
-![image-20250407120359589](../../images/2025-04-07-flash_attention_3/image-20250407120359589.png)
+<p align="center">
+  <img src="../../images/2025-04-07-flash_attention_3/image-20250407124735334.png" style="width:80%;"
+</p>
 
-2. **Thread hierarchy**
-   - Thread (스레드)
-     - GPU에서 명령을 실제로 실행하는 가장 작은 단위.
-     - 각각의 스레드는 자신만의 레지스터 세트를 갖고, 한 개의 명령을 수행합니다.
-   - Warp (워프)
-     - 32개의 스레드가 묶여서 한꺼번에 같은 명령어를 실행하는 최소 스케줄링 단위.
-     - “SIMT”(Single Instruction, Multiple Threads) 모델로, 한 워프 내 모든 스레드는 동시·동일한 명령어를 수행합니다.
-   - Warp Group (워프그룹)
-     - 연속된 4개의 워프(총 128스레드)를 하나의 그룹으로 묶은 개념.
-     - Hopper 아키텍처에서 TMA 복사나 비동기 Tensor Core 연산(mma_async) 시, 워프를 이 단위로 묶어 역할(Producer vs Consumer)을 나눌 때 사용합니다.
-   - Thread Block / CTA (스레드 블록, Cooperative Thread Array)
-     - 여러 워프(최대 32 워프, 1024스레드)로 구성된 실행 단위.
-     - 같은 블록 내 스레드들은 shared memory를 공유하고, `__syncthreads()`로 동기화할 수 있습니다.
-     - 하나의 CTA가 곧 하나의 작업 단위(예: 하나의 Q‑block 처리)를 담당합니다.
-   - ThreadBlock Cluster(스레드블록 클러스터, Hopper 전용)
-     - Hopper 아키텍처에서 CTA들을 물리적·논리적으로 묶어 TMA와 Tensor Core의 비동기 파이프라이닝을 최적화하기 위해 사용되는 단위
-     - 같은 클러스터에 속한 CTA들은 TMA 버퍼와 Tensor Core 파이프라인을 협력적으로 공유·스케줄링합니다.
-   - Grid (그리드)
-     - 커널 실행 시 한 번에 런치되는 모든 CTA(스레드블록)의 집합.
-     - 셀프 어텐션에서는 Batch $\times$ Head $\times$ Row 블록 수 만큼 CTA를 띄우고, 배치 행렬 곱에서는  Batch $\times$ M $\times$ N 블록 수 만큼 CTA를 띄운다. 
-3. **Ascynchrony and warp-specialization**
-   - 데이터 이동(global $\rightarrow$ shared 복사)와 게산(Tensor Core 행렬곱)을 서로 완전히 겹쳐서(overlap) 실행할 수 있습니다. 
-   - 한 CTA 내의 워프 그룹(warp‑group) 단위로, 일부 워프 그룹을 Producer 워프(오직 TMA로 데이터 로드/저장만 수행)로, 나머지 워프 그룹을 Consumer 워프(오직 WGMMA로 행렬곱만 수행)로 분할(specialize)하면 메모리 대기 시간과 계산 대기 시간을 서로 숨길 수 있습니다.
+### 대역폭 
+
+<p align="center">
+  <img src="../../images/2025-04-07-flash_attention_3/image-20250407120359589.png" style="width:80%;"
+</p>
+
+
+
+### Thread hierarchy
+
+- Thread (스레드)
+  - GPU에서 명령을 실제로 실행하는 가장 작은 단위.
+  - 각각의 스레드는 자신만의 레지스터 세트를 갖고, 한 개의 명령을 수행합니다.
+- Warp (워프)
+  - 32개의 스레드가 묶여서 한꺼번에 같은 명령어를 실행하는 최소 스케줄링 단위.
+  - “SIMT”(Single Instruction, Multiple Threads) 모델로, 한 워프 내 모든 스레드는 동시·동일한 명령어를 수행합니다.
+- Warp Group (워프그룹)
+  - 연속된 4개의 워프(총 128스레드)를 하나의 그룹으로 묶은 개념.
+  - Hopper 아키텍처에서 TMA 복사나 비동기 Tensor Core 연산(mma_async) 시, 워프를 이 단위로 묶어 역할(Producer vs Consumer)을 나눌 때 사용합니다.
+- Thread Block / CTA (스레드 블록, Cooperative Thread Array)
+  - 여러 워프(최대 32 워프, 1024스레드)로 구성된 실행 단위.
+  - 같은 블록 내 스레드들은 shared memory를 공유하고, `__syncthreads()`로 동기화할 수 있습니다.
+  - 하나의 CTA가 곧 하나의 작업 단위(예: 하나의 Q‑block 처리)를 담당합니다.
+- ThreadBlock Cluster(스레드블록 클러스터, Hopper 전용)
+  - Hopper 아키텍처에서 CTA들을 물리적·논리적으로 묶어 TMA와 Tensor Core의 비동기 파이프라이닝을 최적화하기 위해 사용되는 단위
+  - 같은 클러스터에 속한 CTA들은 TMA 버퍼와 Tensor Core 파이프라인을 협력적으로 공유·스케줄링합니다.
+- Grid (그리드)
+  - 커널 실행 시 한 번에 런치되는 모든 CTA(스레드블록)의 집합.
+  - 셀프 어텐션에서는 Batch $\times$ Head $\times$ Row 블록 수 만큼 CTA를 띄우고, 배치 행렬 곱에서는  Batch $\times$ M $\times$ N 블록 수 만큼 CTA를 띄운다. 
