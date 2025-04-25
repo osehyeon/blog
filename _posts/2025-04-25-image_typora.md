@@ -34,7 +34,7 @@ typora-root-url: ./typora-root-url
 ## 시도한 접근 
 
 - `{{ site.baseurl }}/images`를 사용하는 방식  
-  - GitHub Pages에서는 정상 작동되나 Typora에서는 렌더링되지 않았습니다.
+  - 깃허브 호스팅에서는 정상 작동되나 Typora에서는 렌더링되지 않았습니다.
 
 ## 최종 해결 방법
 
