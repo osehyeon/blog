@@ -5,7 +5,8 @@ categories: "일상"
 toc: true
 typora-root-url: ./typora-root-url
 ---
-현재 이 블로그는 [Typora](https://typora.io/)를 사용해 작성하고 있습니다.  
+현재 이 블로그는 [Typora](https://typora.io/)를 사용해 작성하고 있습니다. 
+
 이번 글에서는 Typora와 깃허브 호스팅 양쪽 모두에서 이미지가 렌더링하기 위한 시행착오를 정리해보았습니다.
 
 ## 이미지 경로 접근 방식
