@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "타이포라 이미지 경로 설정"
+title: "Typora 이미지 경로 문제"
 categories: "일상"
 toc: true
 typora-root-url: ./typora-root-url
