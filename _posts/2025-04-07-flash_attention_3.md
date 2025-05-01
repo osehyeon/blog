@@ -29,15 +29,15 @@ typora-root-url: ./typora-root-url
 ### SM 내부 모습 
 
 <p align="center">
-  <img src="../../images/2025-04-07-flash_attention_3/image-20250407124735334.png" style="width:80%;"
+  <img src="../../images/2025-04-07-flash_attention_3/image-20250407124735334.png" style"width:80%;">
 </p>
+
 
 ### 대역폭 
 
 <p align="center">
-  <img src="../../images/2025-04-07-flash_attention_3/image-20250407120359589.png" style="width:80%;"
+  <img src="../../images/2025-04-07-flash_attention_3/image-20250407120359589.png" style="width:80%;">
 </p>
-
 
 
 ### Thread hierarchy
