@@ -1,10 +1,12 @@
 ---
 layout: single
-title: "트랜스포머에 대한 정리"
+title: "트랜스포머 기반 모델의 구조"
 categories: "코딩"
 toc: true
 typora-root-url: ./typora-root-url
 ---
+
+트랜스포머 기반 모델의 구조가 어떻게 발전해왔는지에 대해 다룬다. 
 
 ## Attention is All You Need 
 
