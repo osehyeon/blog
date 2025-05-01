@@ -17,8 +17,9 @@ typora-root-url: ./typora-root-url
 트랜스포머는 입력을 해석하는 인코더 블록과 출력을 생성하는 디코더 블록으로 구성된다.
 
 <p align="center">
-  <img src="../../images/2025-04-30-attention/image-20250501011034649.png", width="50%">
+  <img src="../../images/2025-04-30-attention/image-20250501011034649.png" width="50%">
 </p>
+
 
 ### Attention
 
@@ -27,8 +28,9 @@ typora-root-url: ./typora-root-url
 멀티헤드 어텐션은 여러 어텐션을 동시에 사용해, 문장을 다양한 관점에서 이해할 수 있게 한다.
 
 <p align="center">
-  <img src="../../images/2025-04-30-attention/image-20250501012658298.png", width="80%">
+  <img src="../../images/2025-04-30-attention/image-20250501012658298.png" width="80%">
 </p>
+
 
 ### FFN
 
@@ -45,14 +47,20 @@ $$
 GPT-1은 Attention is All You Need 논문의 디코더 구조를 기반으로 하지만 Cross-Attention을 제거하고 causal self-attention만 사용한다. 
 
 <p align="center">
-  <img src="../../images/2025-04-30-attention/image-20250501013607925.png", width="100%">
+  <img src="../../images/2025-04-30-attention/image-20250501013607925.png" width="100%">
 </p>
+
 
 ## BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
 
 2018년 [BERT](https://arxiv.org/abs/1810.04805) 논문을 통해 알려졌다. 
 
 BERT는 Attention is All You Need 논문의 인코더 구조를 기반으로 한다. 
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/bert.png" width="25%">
+</p>
+
 
 FFN의 비선형 함수로 ReLU 대신에 [GeLU](https://www.semanticscholar.org/paper/4361e64f2d12d63476fdc88faf72a0f70d9a2ffb)를 사용하고, 트랜스포머 블록 이후에 Norm이 한 번 더 추가되었다. 
 
@@ -67,7 +75,7 @@ $$
 GPT-2는 트랜스포머 블록에 Post-Norm 대신 [Pre-Norm](https://arxiv.org/pdf/1603.05027) 을 적용하였고, 트랜스포머 블록 이후에 Norm이 한 번 더 추가되었다.
 
 <p align="center">
-  <img src="../../images/2025-04-30-attention/image-20250501030454350.png", width="20%">
+  <img src="../../images/2025-04-30-attention/image-20250501030454350.png" width="20%">
 </p> 
 
 ## Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer
