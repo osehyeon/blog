@@ -158,6 +158,8 @@ $$
 
 ### Feed Forward Network
 
+[GEGLU](https://arxiv.org/pdf/2002.05202)를 사용한다. 
+
 <p align="center">
   <img src="https://storage.googleapis.com/gweb-developer-goog-blog-assets/images/image2_l7UnOuC.original.png" width="80%">
 </p> 
