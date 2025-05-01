@@ -172,6 +172,7 @@ Gemma 2B모델은 MQA(Multi Query Attention)을 사용한다. 7B 모델은 다�
 
 <p align="center">
   <img src="https://storage.googleapis.com/gweb-developer-goog-blog-assets/images/image3_3kHryqa.original.png" width="50%">
+</p>
 
 ## Gemma 2: Improving Open Language Models at a Practical Size
 
@@ -183,6 +184,7 @@ GQA(Group Query Attention)을 적용하였다.
 
 <p align="center">
   <img src="../../images/2025-04-30-attention/image-20250501170226380.png" width="50%">
+</p>
 
 ## DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning
 
