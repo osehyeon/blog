@@ -163,7 +163,7 @@ $$
 </p> 
 
 $$
-\text{GEGLU}(x) &= \operatorname{GELU}(xW_1) \odot (xW_2) \\
+\text{GEGLU}(x) = \text{GELU}(xW_1) \odot (xW_2)
 $$
 
 ### Attention
