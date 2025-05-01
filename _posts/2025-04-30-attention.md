@@ -34,7 +34,7 @@ typora-root-url: ./typora-root-url
 </p>
 
 
-### FFN
+### Feed Forward Network 
 
 FFN은 각 단어의 표현에 비선형 함수를 적용해, 표현력을 확장하는 역할을 한다.
 
@@ -85,6 +85,10 @@ GPT-2는 트랜스포머 블록에 Post-Norm 대신 [Pre-Norm](https://arxiv.org
 
 Attention is All You Need 논문의 인코더-디코더 구조를 기반으로 한다. 
 
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501141713001.png" width="50%">
+</p> 
+
 GPT-2와 같이 트랜스포머 블록에 Pre-Norm을 적용하였고, FFN의 비선형 함수로 ReLU를 사용하였다. 
 
 Absolute Positional Embedding이 아닌 [Relative Position Encoding](https://arxiv.org/abs/1803.02155)를 Relative Position Bias로 단순화하여 attention score에 적용하였다. 
@@ -92,3 +96,102 @@ Absolute Positional Embedding이 아닌 [Relative Position Encoding](https://arx
 $$
 e_{ij} = \frac{(x_i W^Q)(x_j W^K)^T}{\sqrt{d_k}} + b_{i-j}
 $$
+
+## An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale
+
+2020년 [ViT](https://arxiv.org/abs/2010.11929) 논문을 통해 알려졌다. 
+
+트랜스포머의 인코더 구조를 기반으로 하며, 이미지를 언어 모델에서 토큰을 처리하듯 임베딩 패치로 분할하여 입력으로 사용한다.
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501142050351.png" width="25%">
+</p> 
+
+## Llama 2: Open Foundation and Fine-Tuned Chat Models
+
+2023년  [Llama 2](https://arxiv.org/abs/2307.09288) 논문을 통해 알려졌다. 
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501144126606.png" width="80%">
+</p> 
+
+### Attention
+
+[RoPE](https://arxiv.org/pdf/2104.09864)(Rotary Positional Embedding) 방식이 적용되었다. 
+
+- 학습하지 않는 방식이기 때문에, 시퀀스 길이가 달라져도 잘 일반화되는 특성을 갖는다.
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501154927884.png" width="80%">
+</p> 
+
+Llama 2-70B에는 [GQA](https://arxiv.org/pdf/2305.13245)(Grouped Query Attention) 가 적용되었다. 
+
+- 각 토큰이 차지하는 KV cache 크기를 줄여 결과적으로 더 긴 문맥을 처리하기 위해서이다 .
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501153918335.png" width="80%">
+</p> 
+
+### Feed-Forward Network 
+
+$$
+\text{FFN}(x) = W_3 \cdot \left( \text{SiLU}(W_1 x) \odot (W_2 x) \right)
+$$
+
+## Mistral 7B
+
+2023년  [Mistral](https://arxiv.org/pdf/2310.06825) 논문을 통해 알려졌다. 
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501164149806.png" width="40%">
+</p> 
+### SWA (Slide Window Attention)
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501170822218.png" width="80%">
+</p> 
+
+## Gemma: Open Models Based on Gemini Research and Technology
+
+2024년 [Gemma](https://arxiv.org/abs/2403.08295) 논문을 통해 알려졌다. 
+
+### Feed Forward Network
+
+<p align="center">
+  <img src="https://storage.googleapis.com/gweb-developer-goog-blog-assets/images/image2_l7UnOuC.original.png" width="80%">
+</p> 
+
+$$
+\text{GEGLU}(x) &= \operatorname{GELU}(xW_1) \odot (xW_2) \\
+$$
+
+### Attention
+
+Gemma 2B모델은 MQA(Multi Query Attention)을 사용한다. 7B 모델은 다중 헤드 어텐션(MHA)을 사용한다. 
+
+<p align="center">
+  <img src="https://storage.googleapis.com/gweb-developer-goog-blog-assets/images/image3_3kHryqa.original.png" width="50%">
+
+## Gemma 2: Improving Open Language Models at a Practical Size
+
+2024년  [Gemma 2](https://arxiv.org/abs/2408.00118) 논문을 통해 알려졌다.
+
+### Attention
+
+GQA(Group Query Attention)을 적용하였다. 
+
+<p align="center">
+  <img src="../../images/2025-04-30-attention/image-20250501170226380.png" width="50%">
+
+## DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning
+
+2025년 [DeepSeek-R1](https://arxiv.org/abs/2501.12948) 논문을 통해 알려졌다. 
+
+<p align="center">
+  <img src="https://arxiv.org/html/2412.19437v1/x2.png" width="80%">
+</p> 
+
+## Reference 
+
+- [Llama-2-Onnx](https://github.com/microsoft/Llama-2-Onnx/tree/main)
