@@ -1,3 +1,13 @@
+---
+layout: single
+title: "FlashAttention-2의 수식 오류 정리"
+categories: "코딩"
+toc: true
+typora-root-url: ./typora-root-url
+---
+
+
+
 ## FlashAttention-2의 수식 오류 정리
 
 Flashattention-2 논문의 수식 오류를 다룹니다.
